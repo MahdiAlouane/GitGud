@@ -1,0 +1,102 @@
+<div ng-controller="profileupdateController" ng-init="getMyProfile()">
+  <h2 class="md-title text center md-primary"><strong>My Profile</strong></h2>
+  <div layout="row" layout-sm="column" layout-align="space-around" ng-show="loading">
+      <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+  </div>
+  <md-content class="md-padding">    
+    <md-card>
+      <md-card-content>
+        <div class="text center">
+          <img class=" img-circle" ng-src="{{myData.picSRC}}" width="150" border="3"> <br/>
+          <md-button class="md-accent" href="../#/pictureUpload">Edit/Add Picture</md-button>
+          <h2 class="md-title"><strong>{{myData[dataModel.primaryAttribute]}}</strong></h2>
+        </div>
+        <div layout="column" layout-margin ng-if="!update">
+          <div ng-repeat="attribute in dataModel.stringAttributes" ng-if="myData.stringAttributes[attribute]">
+            <p><strong>{{attribute}} :  </strong>{{myData.stringAttributes[attribute]}}</p>
+          </div>
+          <div ng-repeat="attribute in dataModel.arrayAttributes" ng-if="myData.arrayAttributes[attribute]">
+            <p><strong>{{attribute}} :  </strong>{{myData.arrayAttributes[attribute]}}</p>
+          </div>
+          <div ng-repeat="attribute in dataModel.dropdownAttributes" ng-if="myData.dropdownAttributes[attribute.varname]">
+            <p><strong>{{attribute.varname}} :  </strong>{{myData.dropdownAttributes[attribute.varname]}}</p>
+          </div>
+          <p><strong>Email: </strong>{{myData.login.email}}</p>
+        </div>
+        <div layout="column" layout-margin ng-if="update">
+          <div layout layout-sm="column">
+            <div ng-repeat="attribute in dataModel.stringAttributes" flex>
+              <md-input-container>
+                <label>{{attribute}}:</label>
+                <input type="text" ng-model="myData.stringAttributes[attribute]">
+              </md-input-container>
+            </div>
+          </div>
+          <div layout layout-sm="column"> 
+            <div ng-repeat="attribute in dataModel.dropdownAttributes" flex>
+              <md-input-container>
+                <md-select placeholder="{{attribute.varname}}" ng-model="myData.dropdownAttributes[attribute.varname]">
+                  <md-option ng-repeat="option in attribute.options">{{option}}</md-option>
+                </md-select>
+              </md-input-container>
+            </div>
+          </div>
+          <div layout layout-sm="column">
+            <div ng-repeat="attribute in dataModel.arrayAttributes" flex>
+              <md-input-container>
+                <label>{{attribute}} (Comma-separated list, limit 5) :</label>
+                <input type="text" ng-model="myData.arrayAttributes[attribute]" ng-blur="checkArray(myData.arrayAttributes[attribute])">
+              </md-input-container>
+            </div>
+          </div>
+        </div>
+      </md-card-content>
+      <div class="md-actions" layout="row" layout-align="center center">
+        <md-button class="md-accent" ng-if="!update" ng-click="changeUpdate(true)">Edit Profile</md-button>
+      </div>
+      <div class="md-actions" layout="row">
+        <md-button class="md-accent" ng-if="update" ng-click="changeUpdate('cancelled')">Cancel</md-button>
+        <span flex></span>
+        <md-button class="md-primary" ng-if="update" ng-click="updateMyProfile(myData)">Update Profile</md-button>
+      </div>
+    </md-card>
+  </md-content>
+
+  <div layout="row" layout-sm="column" layout-align="space-around" ng-show="postLoading">
+      <md-progress-circular md-mode="indeterminate"></md-progress-circular>
+  </div>
+  <div ng-init="getMyPosts()">
+  <h2 class="md-title text center md-primary" ng-if="publishData.output[0]"><strong>My Posts</strong></h2>
+  <br/>
+  <div ng-repeat="post in publishData.output">
+    <div class="col-sm-4">
+      <div class="card small">
+        <span class= "text right">
+          <i class="plus icon activator"></i>
+        </span>
+        <br/>
+        <div class=" activator text center waves-effect waves-block waves-light">
+            <img class="activator img-circle" src="icons/{{post.imagePath}}" width="75"></img>
+            <div class="card-content waves-effect waves-block waves-light">
+              <span class="card-title activator grey-text text-darken-4">{{post.title}}</span>
+              <br/>
+              <br/>
+              <p><strong>{{post.author}}</strong></p>
+              <p>{{post.timeDisp}}</p>
+              <p><a ng-href="{{post.hyperlink}}"><i class="external icon"></i> {{post.title}}</a></p>
+            </div>
+            <md-button class="md-accent text-center" ng-click="deletePost(post.publishID)">Delete</md-button>
+        </div>
+          <div class="card-reveal">
+          <div class="text-center">
+              <div class="card-title grey-text text-darken-4">{{post.title}} </div>
+          </div>
+              <br/>
+              <p>{{post.blurb}}</p>
+         </div>
+        </div>
+    </div>
+  </div>
+  
+</div>
+</div>

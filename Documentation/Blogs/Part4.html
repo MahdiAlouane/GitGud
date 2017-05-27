@@ -1,0 +1,87 @@
+<h2>Part 4: Picture Upload</h2>
+
+<p>So far, Part 0 and Part 1 cover the data model and user document used in the application followed by Part 2 where we verify accounts through email using Nodemailer and Sendgrid. We then had part 3 which covered session-based user authentication. Now that we can create a user, and allow them to login, it would be ideal to associate a profile picture to this user. For this, we must be able to upload images, and crop them so they are all of a uniform shape. Let's get started!</p>
+
+<h4>Necessary Materials:</h4>
+
+<ul>
+	<li>Node.js</li>
+	<li>Express</li>
+	<li>Node.js 'fs' library</li>
+	<li>GraphicsMagick binaries</li>
+</ul>
+
+<h4>Node Modules Used:</h4>
+
+<ul>
+	<li>Couchbase Node.js SDK/N1QL</li>
+	<li>body-parser</li>
+	<li>uuid</li>
+	<li>Multer</li>
+	<li>GraphicsMagick</li>
+</ul>
+
+<h4>Summary:</h4>
+
+<p>One of the most difficult parts of building Touchbase was creating a way to store images. This was a struggle because there are many different parts (front-end and back-end) that must come together for this process. There was the necessity for cropping, so that users have the most control over their images. This required a cropping module for Angular.js, <a href="https://github.com/koorgoo/ngCropper">ng-cropper</a>, as well as a way to resize the image to the new-found dimensions on the back-end provided by <a href="http://www.graphicsmagick.org/">graphicsMagick</a>. There was also the need to choose what format to store these images in (base64), out of many different approaches. This blog post covers the process of passing the image from front-end to back-end, including cropping and formatting.</p>
+
+<h4>Installing Multer and GraphicsMagick</h4>
+
+<p>Setting up the Multer module is an important part of this process. Multer is a node module that we use to store the images that are posted from the front-end, into a folder on our server. To download the module, run the command below.</p>
+
+<pre><code>$ npm install multer --save</code></pre>
+
+<p>Another important module we need will be GraphicsMagick. Downloading GraphicsMagick must be done in two parts, installing the GraphicsMagick binaries to your system, and downloading the GraphicsMagick node module. The combination allows us to alter images at a specified filepath within our Node.js application. Instructions to download the GraphicsMagick binaries for Linux, OSX and Windows systems can be found on the <a href="https://github.com/couchbaselabs/touchbase/blob/master/PREREQUISITES.md">Touchbase github repo</a>. After completing this step, download the node module for GraphicsMagick with the command below.</p>
+
+<pre><code>$ npm install gm --save</code></pre>
+
+<h4>Multer setup</h4>
+
+<p>The setup of the Multer module is done in the <strong>app.js</strong> file, and it will help indicate how far along an image is in the upload process. The part we care about most is when the upload of an image is complete, which is indicated by a variable called <strong>'done'</strong>. Once this occurs, we can safely access the file and do the necessary cropping and downsizing of the image.</p>
+
+<h4>app.js Multer Setup</h4>
+<script src="https://gist.github.com/pranavmayuram/fac2837a841c38d45144.js"></script>
+
+<p>There's an API endpoint that handles the image cropping and image downsizing (using the setup we did earlier), and most of its work occurs in the <strong>'Picture.attempt'</strong> function. This function only executes after the image upload is complete (when <strong>done</strong> is true), and Multer has stored it in the <strong>uploads</strong> folder specified in the <strong>app.js</strong> setup. The route itself can only retrieve a few attributes of the image before the image upload is complete. This metadata that Multer receives will be crucial during the cropping process.</p>
+
+<p>Multer itself simply uploads any kind of form that is of the type <strong>&lt;enctype='multipart/form-data'&gt;</strong>. The image is simply one kind of input into this form, and so we can add other attributes to the form as well. For example, to get the cropping data from ng-cropper, I create a hidden attribute of the form which is an object that contains all of the cropping data. This way, the image and metadata from the front-end is sent together in the HTML POST executed when the form is submitted. During this process, I also access the browser's localStorage, which contains the sessionID (discussed in <a href="http://blog.couchbase.com/2015/december/exploring-couchbase-and-n1ql-through-touchbase-using-node.js-and-angular.js-%E2%80%93-part-3-session-based-user-authentication">part 3</a>) to send the ID, so that the route can be authenticated. The <strong>'Session.auth'</strong> function is adjusted to handle this situation of the sessionID coming in the <strong>'req.body'</strong> object (which happens when the sessionID is sent as Multer metadata). To see how this is done, the Angular.js implementation of ng-cropper, as well as the HTML form that uploads the image with the cropping data are shown below.</p>
+
+<h4>Multer HTML form with POST in public/html/picture-partial.html</h4>
+<script src="https://gist.github.com/pranavmayuram/86a2a56d599f400b0199.js"></script>
+
+<h4>Use of 'ng-cropper' in pictureController within public/js/touchbase.js</h4>
+<script src="https://gist.github.com/pranavmayuram/8d1d629b69883e5650c3.js"></script>
+
+<p>Multer splits up the form data from into two different parts, when it is sent to the back-end. All the metadata about any upoaded files is specified in <strong>'req.files'</strong>. This tells us basic things like the filepath for the image, image size, image format, etc. Different aspects of this are used in our <strong>'Picture.attempt'</strong> function. The rest of the data from the front-end, anything other than a file, is found in the <strong>'req.body'</strong> attribute. From here, we can access the cropping data that we uploaded using the <strong>&lt;hidden&gt;</strong> HTML form attribute. The way you access these different parameters is using the <strong>&lt;name&gt;</strong> attributes of the different parts of the form. For example, when accessing the uploads of the picture, in the front-end form we had the file input with a name of <strong>'userPhoto'</strong>. To access the metadata for this, we would look at <strong>'req.files.userPhoto'</strong>. To get the cropping data, we would look at its name, <strong>'cropDim'</strong>, and access it using <strong>'req.body.cropDim'</strong>. This data is accessed in the <strong>'/api/uploadAttempt'</strong> route, which can be seen below.</p>
+
+<h4>'/api/uploadAttempt' API</h4>
+<script src="https://gist.github.com/pranavmayuram/b6f1c663956e66d21872.js"></script>
+
+<p>Now that we can access all this data, we need to use it. It comes into use in the <strong>'Picture.attempt'</strong> function in <strong>models/picturemodel.js</strong> where we can use this to actually alter the image. First, we must check that this image is something we can properly store. In our Multer setup in <strong>app.js</strong> we allowed up to 20mb images to be uploaded. We do this for error handling purposes, allowing far more than most would need. If a file happens to be uploaded at a size greater than our limit, Multer fails silently, so we just set an aribitrarily high limit. In <strong>'Picture.attempt'</strong>, we check to see if the image is greater than 7.5mb, and if so, we delete it. Under this second level of validation, we would tell the user that the maximum file size is 7.5mb and their image could not be uploaded with guidance on how they could fix the issue. The <strong>'fs.unlink'</strong> command deletes the file using the file path that Multer gave us in the <strong>'req.files'</strong> attribute. The function then calls <strong>'Picture.attempt'</strong>, with the aforementioned filepath and  manipulates the image with the <strong>'fs'</strong> library and GraphicsMagick.</p>
+
+<h4>'Picture.attempt' function</h4>
+<script src="https://gist.github.com/pranavmayuram/4bc2956570d0aa1a490b.js"></script>
+
+<p>The final steps of validation for the image come from GraphicsMagick. The reason we use GraphicsMagick to check the file's type instead of Multer is because Multer only checks the extension of the file which doesn't necessarily represent the contents. GraphicsMagick does its own analysis of the file. If the file type is not one of the acceptable formats, the upload fails and the user is notified of the error. Passing this validation, we need only alter the file for cropping and downsizing.</p>
+
+<p>Using GraphicsMagick, the first step is to <strong>'autoOrient()'</strong> which will use EXIF (an image file formatting standard) data to properly orient the image to the orientation in which it was taken. This is important for mobile uploads, as many of these can become rotated 90 degrees, leading to an odd image.</p>
+
+<p>The image is then cropped using cropping data we got from the front-end through <strong>'req.body.cropDim'</strong>. This is then passed to GraphicsMagick's cropping function, which requires an X and Y displacement, as well as image height and width. ng-cropper expects this method of cropping and gives us these attributes when the image is cropped making it simple for us to just pass these attributes directly to GraphicsMagick.</p>
+
+<p>Finally, we do some basic downsizing to the image so that the file is smaller. In my opinion, 7.5mb, or even 2mb is a little large to be storing and retrieving every time the website is used, and a user profile is viewed. Though this may not necessarily be a huge strain on the application, it could cause a poor experience for the users, especially mobile users. After some testing, I found that scaling down to 200px and setting the image quality to 50% had the maximum benefit in terms of image quality and file size. In my current implementation, the images are 150px squares. Keep this in mind, as you may want to do the downsizing differently for your application if you choose to display the images larger or smaller. After all these changes, this altered image is written over its prior location.</p>
+
+<p>After the image is properly altered, we want to read it again to transform the image binary into a base64 string using a Javascript <strong>'Buffer'</strong> function. The reason we do this is because HTML can read base64 in its image tags, so this will simplify rendering the images on the front-end when we want to display them.</p>
+
+<p>Finally, we upload this base64 string using a Key-Value insert operation. Using the <strong>'Session.auth'</strong> function, and the sessionID sent in the Multer form data, we know the user ID of the user who uploaded the image. Then in <strong>'req.userID'</strong> as we can see the <strong>'/api/uploadAttempt'</strong> API. This userID, with '_picMulterNode' appended, is used as the document ID for the image, so that we can easily link the user to this image in the future when we need to find a user's complete profile.</p>
+
+<p>Couchbase is intelligent, and recognizes that this base64 string that has been uploaded is not JSON, and stores it as type binary. After this point, we use the <strong>'fs.unlink'</strong> function to delete the picture from the <strong>uploads</strong> folder. This essentially renders the <strong>uploads</strong> folder as a buffer, and then inserts the image's base64 contents into the database, before deletion from the <strong>uploads</strong> folder. Finally, a N1QL query is executed to change the 'login.hasPicture' boolean attribute for the according user, to true, from its default false. This will ensure that the user's profile doesn't get the stock photo applied to it, and instead a search for the user's uploaded profile photo is executed.</p>
+
+<h4>'Picture.receive' function</h4>
+
+<p><script src="https://gist.github.com/pranavmayuram/417599a142ce7727264f.js"></script></p>
+
+<p>At the end of all of this picture uploading, there also has to be a way to receive each user's profile picture. For this, we use the <strong>'Picture.receive'</strong> function. This is called in the <strong>'/api/advancedSearch'</strong> API in <strong>routes/routes.js</strong> because this endpoint has to find every user and their profile picture to display on the front-end. The <strong>'Picture.receive'</strong> function takes a user's documentID as input and returns the base64 string of their image. It first checks that the 'login.hasPicture' boolean is true. If not, it simply applies the default picture to the user. If the attribute is true, it then takes the user's 'uuid' attribute and then appends '_picMulterNode' to this and then does a standard KEY/VALUE get to retrieve the user's image, which we stored as a base64 string. The code for this function can be seen above.</p>
+
+<p>In summary, we used Multer to handle file uploads from <strong>&lt;enctype='multipart/form-data'&gt;</strong> forms, and stored them in an <strong>uploads</strong> folder on our server. We also used hidden attributes within this form to store cropping data from ng-cropper, and added this to the body of data sent in Multer. On the back-end, we used GraphicsMagick to first crop the image with the ng-cropper cropping data, and downsized the image for a better UX. We converted the image to base64, stored it in Couchbase, and kept it with a documentID that is related to the user's documentID. Finally, we wrote a function to retrive an individual's base64 image string, so that it can be used with ease inside of an HTML image attribute on the front-end.</p>
+
+<p>That concludes the picture uploading portion of the Touchbase tutorial series. Please leave a comment below with any feedback, and thank you for reading!</p>

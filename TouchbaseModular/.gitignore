@@ -1,0 +1,6 @@
+node_modules
+bower_components
+uploads
+.DS_Store
+key.pem
+cert.pem

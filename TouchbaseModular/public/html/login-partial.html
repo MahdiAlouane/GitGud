@@ -1,0 +1,39 @@
+<div ng-controller="loginController"> 
+  <div class="vertical-center">
+    <div class="container">
+    <br/>
+    <div class="row text-center">
+      <img src="icons/touchbaseLogo.png" width="40"></img>
+    </div>
+    <h5 class="text-center"><font color="white">{{dataModel.projectName}} | Login</font> </h5>
+    <div flex-sm="100" flex-gt-sm="90" flex-gt-md="70" flex-gt-lg="50" class="md-whiteframe-z4">
+        <div class="md-padding" style="background:white">
+            <div flex-sm="100" flex-gt-sm="80" layout-sm="column">
+                <form name="contactForm" data-ng-submit="loginAuth(formData)">
+                    <md-input-container>
+                        <label>Email:</label>
+                        <input type="email" ng-model="formData.email" required name="email" ng-blur="checkEmail(formData.email)">
+                        <div ng-messages="contactForm.email.$error" role="alert">
+                          <div ng-message="required" ng-hide="!(errors.emailError)">{{errors.emailError}}</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container flex>
+                        <label>Password:</label>
+                        <input type="password" ng-model="formData.password" required>
+                    </md-input-container>
+ 
+                    <md-button type="submit" class="md-primary" ng-disable="contactForm.$invalid"
+                               ng-class="{'md-raised md-primary': (contactForm.$dirty && contactForm.$valid) }"
+                               aria-label="Save Project">Login</md-button>
+                </form>
+            </div>
+        </div>
+      </div>
+      <br/>
+          <div class="text-center">
+                  <p><font color="white">New to us?</font/></p>
+                  <p><md-button class="md-raised md-default" ui-sref="register"><font color="{{dataModel.colorHex}}">Sign Up</font></md-button></p>
+          </div>
+      </div>
+    </div>
+</div>

@@ -1,0 +1,70 @@
+<!doctype HTML>
+
+<html>
+<body>
+	<h2>Part 5: Graphing</h2>
+
+	<h4>Necessary Materials:</h4>
+	<ul>
+		<li>Node.js</li>
+		<li>Express</li>
+		<li>Chart.js</li>
+	</ul>
+
+	<h4>Node Modules Used:</h4>
+	<ul>
+		<li><a href="http://carlcraig.github.io/tc-angular-chartjs/">tc-angular-chartjs</a></li>
+		<li><a href="https://github.com/expressjs/body-parser">body-parser</li>
+		<li><a href="http://momentjs.com/">moment.js</a></li>
+	</ul>
+
+	<h4> Summary: </h4>
+
+	<p>To maintain a social network, and improve the experience for an end-user, it's important to keep track of information about these users and their usage habits. Much of this information may not seem immediately useful to the end-user, but one intersection of this tracking and useful end-user information is login times. This information is used in many different ways to optimize usage of these networks for the consumers (scale up nodes for peak traffic), as well as to track potential security concerns.</p>
+
+	<p>Since this application concerns itself primarily with the basic bones of a social network, we use some graphing to analyze data we are collecting about the user.</p>
+
+	<p>From the start we discussed the &#39;timeTracker&#39; object within each user document. This had a &#39;loginTimes&#39; attribute which we have been continually updating during every login with the <strong>&#39;/api/loginAuth&#39;</strong> endpoint. If this is new to you, refer back to <a href="http://blog.couchbase.com/2015/october/exploring-couchbase-and-n1ql-through-touchbase-using-node.js-and-angular.js-%E2%80%93-part-2-email-verification">part 2</a> where this endpoint was discussed at length. In essence, this endpoint continually prepends the latest time the user logs in to the array &#39;loginTimes&#39;. This is the data we will analyze using a N1QL query, as well as a Chart.js adaptation for Angular.js (tc-angular-chartjs), to display the information retrieved from the N1QL date query.</p>
+
+	<p>Below, we have the statistics endpoint which is used to retrieve the data from each user&#39;s &#39;loginTimes&#39; attribute, and return an object that the front-end graphing library can use to plot the site's usage over time.</p>
+
+	<h4>&#39;/api/graphData&#39; API</h4>
+
+	<script src="https://gist.github.com/pranavmayuram/d245ebb79db87fe54fef.js"></script>
+
+	<p>This endpoint takes in one argument, which is the scope of time which should be displayed. In this case, the function either accepts &#39;day&#39; or &#39;week&#39;. This will return an array of either 24 integer values (&#39;day&#39;), or 7 integer values (&#39;week&#39;) depending on which type of date range is specified. The function that gets all of this data is <strong>&#39;Statistics.newGraph&#39;</strong>, which will create a N1QL query to get the values we desire. The function is shown below. </p>
+
+	<h4>&#39;Statistics.newGraph&#39; function</h4>
+	
+	<script src="https://gist.github.com/pranavmayuram/cc80101d7edbfd36962c.js"></script>
+
+	<p>This incredibly long function is actually doing something very simple. There are three parts to this: </p>
+
+	<ol>
+		<li>Check the date range of &#39;week&#39; or &#39;day&#39;</li>
+		<li>Execute N1QL query to group data by the last 7 days or the last 24 hours</li>
+		<li>Use moment.js and arrays to create the proper order of the x-axis</li>
+	</ol>
+
+	<p>The first part of this is accomplished simply using &#39;if/else&#39; statements. The next part gets slightly more complicated, so we will take a second to break down the N1QL query that is being executed, and how we understand what data it will retrieve for us.</p>
+
+	<h4>N1QL date query example for past day</h4>
+
+	<script src="https://gist.github.com/pranavmayuram/adf8f9baeb1489ac5189.js"></script>
+
+	<p>Let's take the example of a &#39;day&#39; to understand the process. The way to look at it is that we first unnest all of the array elements into their own separate objects. In this way we can observe each one individually. After we <strong>UNNEST</strong> them, we find out how many hours ago each login time occured, from the time of the API request, which is done using <strong>DATE_DIFF_STR(STR_TO_UTC(NOW_STR())</strong>. We then take each of these times and <strong>GROUP BY</strong> how long ago they occured. Based on these groups, we get a <strong>COUNT</strong> of the number of times that are in that group (how many of these logins occured per hour). This gives us an array of objects that contain the number of hours ago these times occured, and a count that describes how many logins occured this many hours ago. Once we have this, we create a <strong>HAVING</strong> clause that checks to make sure the number of hours ago these happened does not exceed 24, so that we simply get one day; no more, no less. This now gives us exactly what we needed, which is an array of objects stratified by the number of hours ago each of these logins happened, as well as how many logins happened.</p>
+
+	<p>After this, we take the array of objects, and place the login counts into an array, which is indexed based on the hour at which they happened. This array is initialized with 0s, such that there is no error with graphing undefined values. Once this is done, the process of handling data from the N1QL query is complete.</p>
+
+	<p>That takes care of a bulk of the work, and now all we have to do is simply match these up with the proper hours and dates accordingly. We use a predefined array of either <strong>&#39;hoursX&#39;</strong> or <strong>&#39;daysX&#39;</strong> and loop through it to create the proper x-axis. Using the current day, which is found by moment.js, we then create a successful iterative pattern to find the according days and weeks. When we use the moment.js function for <strong>&#39;moment().day();&#39;</strong>, etc. we retrieve a day or hour indexed starting at 1. This is accounted for in the iterative pattern.</p>
+
+	<h4>Front-end usage</h4>
+
+	<p>Once both of these arrays are created/obtained, there is no more work to be done, other than on the front-end. We simply return these two arrays to the API endpoint in the form of <strong>&#39;graphObj&#39;</strong> and then send them back to the client in our <strong>&#39;/api/graphData&#39;</strong> endpoint. This completes the back-end work. A set of example code of using this with tc-angular-chartjs can be seen in the github repo in <strong>public/js/touchbase.js</strong> under &#39;statisticsController&#39;, and the HTML for it can be seen in <strong>public/html/statistics-partial.html</strong>.</p>
+
+
+	<p>That concludes the graphing portion of the Touchbase tutorial. Please comment below with any feedback or criticism. Thanks for reading, and hope you have an easier time making beautiful charts using N1QL date queries and a great front-end graphing library!</p>
+
+
+</body>
+</html>

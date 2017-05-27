@@ -1,0 +1,47 @@
+<md-dialog aria-label="Mango (Fruit)">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Make Post</h2>
+      <span flex></span>
+      <i class="inverted remove icon" ng-click="cancel()"></i>
+      <!--<md-button class="md-icon-button" ng-click="cancel()">
+        <md-icon md-svg-src="icons/ic_clear_black_24px.svg" aria-label="Close dialog"></md-icon>
+      </md-button>-->
+    </div>
+  </md-toolbar>
+  <md-dialog-content>
+    <form name="userForm" data-ng-submit="publishTry(postData)" novalidate>
+      <div layout layout-sm="column">
+        <md-input-container flex>
+          <label><i class="left quote icon"></i>Title</label>
+          <input ng-model="postData.title" md-maxlength="15" required>
+          <div ng-messages="userForm.title.$error" role="alert">
+            <div ng-message="required" ng-hide="!(titleError)">{{titleError}}</div>
+          </div>
+        </md-input-container>
+        <md-input-container flex>
+          <label><i class="external icon"></i>Link</label>
+          <input ng-model="postData.webpage">
+        </md-input-container>
+      </div>
+      <md-input-container flex>
+        <label>Description/Blurb</label>
+        <textarea ng-model="postData.blurb" columns="1" md-maxlength="400" rows="3" required></textarea>
+        <div ng-messages="userForm.blurb.$error" role="alert">
+            <div ng-message="required" ng-hide="!(blurbError)">{{blurbError}}</div>
+        </div>
+      </md-input-container>
+    <!--<span flex></span>-->
+    <div layout layout-sm="column">
+      <md-button ng-click="cancel()" class="md-accent">
+       Cancel
+      </md-button>
+      <span flex></span>
+      <md-button type="submit" class="md-primary" ng-disable="userForm.$invalid"
+                               ng-class="{'md-raised md-primary': (userForm.$dirty && userForm.$valid) }"
+                               aria-label="Save Project">Post</md-button>
+      </md-button>
+    </div>
+    </form>
+  </md-dialog-content>
+</md-dialog>
