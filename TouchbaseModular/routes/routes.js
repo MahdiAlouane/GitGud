@@ -62,9 +62,6 @@ var appRouter = function(app) {
             if (x.length === 0) {
                 return res.status(400).send('The username entered does not exist');   
             }
-            if(!User.validatePassword(req.body.password, user[0].password)) {
-                return res.status(400).send("The password entered is invalid");
-            }
             User.addLoginTime(user[0].uuid, function(error, result) {
                 if(error) {
                     return res.status(400).send(error);
