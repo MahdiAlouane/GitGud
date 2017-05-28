@@ -29,11 +29,8 @@
             <div ng-if="!loading">
                 <canvas tc-chartjs-line chart-options="options" chart-data="data" auto-legend></canvas>
             </div>
-              <md-card-content>
-              </md-card-content>
+              <p ng-repeat="login in logins">{{login}}</p>
               <div class="md-actions" layout="row" layout-align="end center">
-                <md-button class="md-primary" ng-click="getGraphData('day')">Daily View</md-button>
-                <md-button class="md-primary" ng-click="getGraphData('week')">Weekly View</md-button>
               </div>
         </md-card>
     </md-content>

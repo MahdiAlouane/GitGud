@@ -45,7 +45,7 @@ Publish.search = function(params, callback) {
     if (params.author) {
         pubQuery+= ("AND author LIKE LOWER(%\""+params.author+"\"%) ");
     }
-    pubQuery += "ORDER BY time DESC";
+    pubQuery += "GROUP BY time";
     pubQueryN1ql = N1qlQuery.fromString(pubQuery);
     console.log(pubQueryN1ql);
     publishBucket.query(pubQueryN1ql, function (error, result) {

@@ -470,8 +470,9 @@ touchbase.controller('statisticsController', function ($scope, $http, $window) {
                 if (result.currentSession===false) {
                     $window.location.href="index.html";
                 }
-                console.log(result);
-                /*$scope.graphData = result;
+                console.log(result[result.length - 1].logins);
+                $scope.logins = result[result.length - 1].logins;
+                $scope.graphData = result[result.length - 1].logins;
                 $scope.viewData('day');
                 $scope.activeX= $scope.graphData.xDay;
             $scope.activeTotal= $scope.graphData.dayTotal;
@@ -485,7 +486,7 @@ touchbase.controller('statisticsController', function ($scope, $http, $window) {
                 if (!$scope.activeDistinct[i]) {
                     $scope.activeDistinct[i] = 0;
                 }
-            }*/
+            }
                 if (timeUnit==='week') {
                     $scope.type= 'Weekly';
                 }

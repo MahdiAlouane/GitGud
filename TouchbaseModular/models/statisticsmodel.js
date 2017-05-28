@@ -12,7 +12,7 @@ var N1qlQuery           = require('couchbase').N1qlQuery;
 
 function Statistics() { };
 
-/*
+
 Statistics.graph = function(callback) {
     // time unit is either days(for a week), or 'hours' (for a day)
     var graphObj = {'xWeek':[], 'weekTotal':[], 'weekDistinct':[], 'xDay':[], 'dayTotal':[], 'dayDistinct':[]};
@@ -27,6 +27,7 @@ Statistics.graph = function(callback) {
             return callback(error, null);
         }
         console.log(result);
+        return callback(null, result);
         for (i=0; i<result.length; i++) {
             var dayDistinctBuffer = [];
             var weekDistinctBuffer = [];
@@ -111,15 +112,15 @@ Statistics.graph = function(callback) {
             graphObj.dayTotal.reverse();
             graphObj.dayDistinct.reverse();
         }
-        callback(null, graphObj);
+        callback(null, result.logins);
     });
 };
-*/
 
+/*
 Statistics.newGraph = function (timeUnit, callback) {
     var graphObj = {};
-    var dayQuery = N1qlQuery.fromString("SELECT DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"hour\") AS deltaTime, COUNT(*) AS countTime from "+userBucketName+" UNNEST timeTracker.loginTimes AS time GROUP BY DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"hour\") HAVING DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"hour\") < 24 ORDER BY deltaTime");
-    var weekQuery = N1qlQuery.fromString("SELECT DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"day\") AS deltaTime, COUNT(*) AS countTime from "+userBucketName+" UNNEST timeTracker.loginTimes AS time GROUP BY DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"day\") HAVING DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"day\") < 7 ORDER BY deltaTime");
+    var dayQuery = N1qlQuery.fromString("SELECT DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"hour\") AS deltaTime, COUNT(*) AS countTime from "+userBucketName+" UNNEST timeTracker.loginTimes AS time GROUP BY DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"hour\") HAVING DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"hour\") < 24 ");
+    var weekQuery = N1qlQuery.fromString("SELECT DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"day\") AS deltaTime, COUNT(*) AS countTime from "+userBucketName+" UNNEST timeTracker.loginTimes AS time GROUP BY DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"day\") HAVING DATE_DIFF_STR(STR_TO_UTC(NOW_STR()), time, \"day\") < 7 ");
     if (timeUnit === 'day') {
         userBucket.query(dayQuery, function (error, result) {
             if (error) {
@@ -180,6 +181,6 @@ Statistics.newGraph = function (timeUnit, callback) {
     else {
         return callback('please enter a valid timeUnit', null);
     }
-};
+};*/
 
 module.exports = Statistics;

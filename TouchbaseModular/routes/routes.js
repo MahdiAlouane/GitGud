@@ -13,10 +13,11 @@ var primaryAttribute    = configData.primaryAttribute;
 var appRouter = function(app) {
 
     app.get("/api/graphData", Session.auth, function(req, res, next) {
-        Statistics.newGraph(req.query.timeUnit, function (error, result) {
+        Statistics.graph( function (error, result) {
             if (error) {
                 return res.status(400).send(error);
             }
+            console.log(JSON.stringify(result));
             res.json(result);
         });
     });

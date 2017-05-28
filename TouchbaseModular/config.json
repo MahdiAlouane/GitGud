@@ -4,7 +4,7 @@
         "userBucket": "users",
         "pictureBucket": "users_pictures",
         "publishBucket": "users_publishments",
-        "TouchbasePort": 3000
+        "TouchbasePort": 8082
     },
     "SendGrid": {
     	"username" : "mahdi94",
