@@ -65,9 +65,6 @@ var appRouter = function(app) {
             if(!User.validatePassword(req.body.password, user[0].password)) {
                 return res.status(400).send("The password entered is invalid");
             }
-            if (!user[0].login.emailVerified) {
-                return res.status(400).send("The username (email) entered is not yet verified, please verify before logging in.");
-            }
             User.addLoginTime(user[0].uuid, function(error, result) {
                 if(error) {
                     return res.status(400).send(error);
