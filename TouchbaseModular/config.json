@@ -4,14 +4,14 @@
         "userBucket": "users",
         "pictureBucket": "users_pictures",
         "publishBucket": "users_publishments",
-        "TouchbasePort": 3000
+        "TouchbasePort": 8080
     },
     "SendGrid": {
     	"username" : "",
     	"password" : ""
     },
     "dataModel": {
-    	"projectName": "Touchbase",
+    	"projectName": "GitGud",
     	"colorHex": "#C62828",
     	"primaryAttribute": "Name",
 		"arrayAttributes" : ["Expertise","Hobbies"],
@@ -28,14 +28,14 @@
 		],
 		"pubTypes": [
 			{
-				"type": "Github Projects",
-				"imagePath": "GitHub-Mark-120px-plus.png",
-				"icon": "github"
+				"type": "Game Reviews",
+				"imagePath": "game.png",
+				"icon": "game"
 			},
 			{
-				"type": "Couchbase in the News",
-				"imagePath": "couchbase-logo.png",
-				"icon": "newspaper"
+				"type": "Discussion",
+				"imagePath": "review.png",
+				"icon": "talk"
 			}
 		]
     }

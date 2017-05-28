@@ -12,10 +12,10 @@ var https           = require('https');
 var http            = require('http');
 
 // HTTPS with self-signed certs
-var options = {
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
-};
+//var options = {
+//  key: fs.readFileSync('key.pem'),
+//  cert: fs.readFileSync('cert.pem')
+//};
 
 // use commands
 app.use(bodyParser.urlencoded({extended:true, limit: '4mb'}));
@@ -56,19 +56,19 @@ var routes = require("./routes/routes.js")(app);
 
 // set up HTTP and HTTPS if possible
 var httpServer = http.createServer(app);
-var httpsServer = https.createServer(options, app);
+//var httpsServer = https.createServer(options, app);
 httpServer.listen(config.couchbase.TouchbasePort);
-httpsServer.listen(8443);
+//httpsServer.listen(8443);
 /*https.createServer({
     key: options.key,
     cert: options.cert
 }, app).listen(443);*/
 
-//http.createServer(app).listen(80);
+http.createServer(app).listen(80);
 //https.createServer(options, app).listen(443);
 // startup our app at http://localhost:3000
-//var port = process.env.PORT || config.couchbase.TouchbasePort;
-//app.listen(3000);               
+var port = process.env.PORT || config.couchbase.TouchbasePort;
+app.listen(3000);               
 
 // inform user of IP                     
 console.log('View Touchbase at localhost:' + config.couchbase.TouchbasePort);
